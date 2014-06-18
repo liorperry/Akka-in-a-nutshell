@@ -8,6 +8,8 @@ import akka.cluster.ClusterEvent.MemberEvent;
 import akka.cluster.ClusterEvent.MemberRemoved;
 import akka.cluster.ClusterEvent.MemberUp;
 import akka.cluster.ClusterEvent.UnreachableMember;
+import akka.cluster.Member;
+import akka.cluster.MemberStatus;
 import akka.contrib.pattern.ClusterSharding;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -21,7 +23,7 @@ public class SimpleShardClusterListener extends UntypedActor {
     public void preStart() {
         //#subscribe
         cluster.subscribe(getSelf(), ClusterEvent.initialStateAsEvents(),
-                MemberEvent.class, UnreachableMember.class);
+                MemberEvent.class, UnreachableMember.class,ClusterEvent.class);
         //#subscribe
     }
 
@@ -47,6 +49,13 @@ public class SimpleShardClusterListener extends UntypedActor {
         } else if (message instanceof UnreachableMember) {
             UnreachableMember mUnreachable = (UnreachableMember) message;
             log.info("Member detected as unreachable: {}", mUnreachable.member());
+        } else if (message instanceof ClusterEvent.CurrentClusterState) {
+            ClusterEvent.CurrentClusterState state = (ClusterEvent.CurrentClusterState) message;
+            for (Member member : state.getMembers()) {
+                if (member.status().equals(MemberStatus.up())) {
+                    log.info("Member "+member.address() +" is up");
+                }
+            }
 
         } else if (message instanceof MemberRemoved) {
             MemberRemoved mRemoved = (MemberRemoved) message;

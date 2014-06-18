@@ -34,7 +34,6 @@ public class RateStreamer extends UntypedActor {
             }
             final SymbolStream event = RateStreamBuilder.buildTimelyStream(lastRates);
             eventStream.publish(event);
-//            eventStream.publish(Persistent.create(event));
             lastRates = event;
         } else {
             unhandled(message);

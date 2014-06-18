@@ -9,6 +9,8 @@ import akka.cluster.ClusterEvent.MemberEvent;
 import akka.cluster.ClusterEvent.MemberRemoved;
 import akka.cluster.ClusterEvent.MemberUp;
 import akka.cluster.ClusterEvent.UnreachableMember;
+import akka.cluster.Member;
+import akka.cluster.MemberStatus;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
@@ -30,9 +32,9 @@ public class SimplePubSubClusterListener extends UntypedActor {
     public void preStart() {
         //#subscribe
         cluster.subscribe(getSelf(), ClusterEvent.initialStateAsEvents(),
-                MemberEvent.class, UnreachableMember.class);
+                MemberEvent.class, UnreachableMember.class,ClusterEvent.class);
         //#subscribe
-        subscriber = getContext().system().actorOf(Props.create(Subscriber.class), "subscriber" );
+        subscriber = getContext().system().actorOf(Props.create(Subscriber.class), "subscriber");
         publisher = getContext().system().actorOf(Props.create(Publisher.class), "publisher");
     }
 
@@ -51,6 +53,13 @@ public class SimplePubSubClusterListener extends UntypedActor {
             // after a while the subscriptions are replicated
             publisher.tell("hello", null);
             //another node
+        } else if (message instanceof ClusterEvent.CurrentClusterState) {
+            ClusterEvent.CurrentClusterState state = (ClusterEvent.CurrentClusterState) message;
+            for (Member member : state.getMembers()) {
+                if (member.status().equals(MemberStatus.up())) {
+                    log.info("Member "+member.address() +" is up");
+                }
+            }
         } else if (message instanceof UnreachableMember) {
             UnreachableMember mUnreachable = (UnreachableMember) message;
             log.info("Member detected as unreachable: {}", mUnreachable.member());

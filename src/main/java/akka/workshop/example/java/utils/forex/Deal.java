@@ -55,12 +55,8 @@ public class Deal implements Serializable{
     }
 
     public static BigDecimal calculateValue(Deal deal,SymbolPosition currentPosition) {
-        BigDecimal delta = deal.openPosition.getValue().subtract(currentPosition.getValue());
-        if (deal.type != DealType.BUY) {
-            delta = currentPosition.getValue().subtract(deal.openPosition.getValue());
-        }
-        deal.dealValue = delta.multiply(deal.buyAmount);
-        return deal.dealValue;
+    //todo implement
+        return BigDecimal.ZERO;
     }
 
     @Override
