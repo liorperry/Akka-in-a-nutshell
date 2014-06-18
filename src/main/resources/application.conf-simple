@@ -1,0 +1,10 @@
+akka {
+    loglevel = DEBUG
+
+    persistence.journal.leveldb.dir = "target/example/journal"
+    persistence.snapshot-store.local.dir = "target/example/snapshots"
+
+    # DO NOT USE THIS IN PRODUCTION !!!
+    # See also https://github.com/typesafehub/activator/issues/287
+    persistence.journal.leveldb.native = false
+}
